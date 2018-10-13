@@ -1,4 +1,58 @@
 // Storage Controller
+const StorageCtrl = (function() {
+  // Public methods
+  return {
+    storeItem: function(newItem) {
+      let items;
+
+      // Check if any items in localStorage
+
+      if (localStorage.getItem("items") === null) {
+        // No items set
+
+        // Note:
+        // If there's nothing in localStorage (if its null), we set the items to an empty array.
+        // Then we push the new item into the items array.
+        // Then we set it to localStorage as 'items'
+
+        items = [];
+
+        // Push new item
+        items.push(newItem);
+
+        // Set localStorage
+        localStorage.setItem("items", JSON.stringify(items));
+      } else {
+        // There are items
+
+        // Note:
+        // If there is something in the localStorage, we need to get its stringified object and parse it into an object.
+        // Once we get the object from localStorage, we can then push the new item into the items array
+        // And then we re set the items array into the localStorage as stringify
+
+        // Get what is already in localStorage
+        items = JSON.parse(localStorage.getItem("items"));
+
+        // Push new item
+        items.push(newItem);
+
+        // Re set to localStorage
+        localStorage.setItem("items", JSON.stringify(items));
+      }
+    },
+    getItemsFromStorage: function() {
+      let items = [];
+
+      // First Check to see if there's any items in the localStorage
+      if (localStorage.getItem("items") === null) {
+        items = [];
+      } else {
+        items = JSON.parse(localStorage.getItem("items"));
+      }
+      return items;
+    }
+  };
+})();
 
 /*****************
  * Item Controller
@@ -16,23 +70,24 @@ const ItemCtrl = (function() {
 
   // Data Structure (or State)
   const data = {
-    items: [
-      // {
-      //   id: 0,
-      //   name: "Steak Dinner",
-      //   calories: 1200
-      // },
-      // {
-      //   id: 1,
-      //   name: "Cookie",
-      //   calories: 400
-      // },
-      // {
-      //   id: 2,
-      //   name: "Eggs",
-      //   calories: 300
-      // }
-    ],
+    // items: [
+    //   // {
+    //   //   id: 0,
+    //   //   name: "Steak Dinner",
+    //   //   calories: 1200
+    //   // },
+    //   // {
+    //   //   id: 1,
+    //   //   name: "Cookie",
+    //   //   calories: 400
+    //   // },
+    //   // {
+    //   //   id: 2,
+    //   //   name: "Eggs",
+    //   //   calories: 300
+    //   // }
+    // ],
+    items: StorageCtrl.getItemsFromStorage(),
     currentItem: null,
     totalCalories: 0
   };
@@ -274,7 +329,7 @@ const UICtrl = (function() {
 /*****************
  * App Controller
  */
-const App = (function(ItemCtrl, UICtrl) {
+const App = (function(ItemCtrl, StorageCtrl, UICtrl) {
   // Load Event Listeners
   const loadEventListeners = function() {
     // Get UI Selectors
@@ -338,6 +393,9 @@ const App = (function(ItemCtrl, UICtrl) {
       const totalCalories = ItemCtrl.getTotalCalories();
       // Add total calories to UI
       UICtrl.showTotalCalories(totalCalories);
+
+      // Store in localStorage
+      StorageCtrl.storeItem(newItem);
 
       // Clear fields
       UICtrl.clearInput();
@@ -455,7 +513,7 @@ const App = (function(ItemCtrl, UICtrl) {
       loadEventListeners();
     }
   };
-})(ItemCtrl, UICtrl);
+})(ItemCtrl, StorageCtrl, UICtrl);
 
 // Initialize App
 App.init();
